@@ -8,9 +8,16 @@ import android.media.AudioRecord;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
+import android.os.Environment;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,7 +29,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initMediaProjection();
+
+
+
+        findViewById(R.id.startButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                initMediaProjection();
+            }
+        });
+
+
     }
 
     private void initMediaProjection() {
@@ -51,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
         AudioFormat format =
                 new AudioFormat.Builder()
                         .setEncoding(AudioFormat.ENCODING_MP3)
+                        .setSampleRate(8000)
+                        .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
                         .build();
 
         AudioRecord record =
@@ -58,6 +77,50 @@ public class MainActivity extends AppCompatActivity {
                         .setAudioPlaybackCaptureConfig(config)
                         .setAudioFormat(format)
                         .build();
+
+
         record.startRecording();
+
+        File appDirectory = new File(Environment.getExternalStorageDirectory() + "/TuneScraper");
+        if (!appDirectory.exists()){
+            appDirectory.mkdirs();
+        }
+
+        File outputFile = new File(appDirectory.getPath() + File.separator + "29919920.mp3");
+
+        try {
+            outputFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        short sData[] = new short[1024];
+        FileOutputStream outputStream = null;
+        try {
+            outputStream = new FileOutputStream(appDirectory.getPath() + File.separator + "29919920.mp3");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        record.read(sData, 0, 1024);
+        byte bData[] = short2byte(sData);
+        try {
+            outputStream.write(bData);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private byte[] short2byte(short[] sData) {
+        int shortArrsize = sData.length;
+        byte[] bytes = new byte[shortArrsize * 2];
+        for (int i = 0; i < shortArrsize; i++) {
+            bytes[i * 2] = (byte) (sData[i] & 0x00FF);
+            bytes[(i * 2) + 1] = (byte) (sData[i] >> 8);
+            sData[i] = 0;
+        }
+        return bytes;
+
     }
 }
