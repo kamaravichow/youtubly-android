@@ -1,4 +1,6 @@
-# Tune Catcher
-An android app to catch tunes played on your device
+# Youtube.ly
+An android app to download videos and songs from youtube to phone internal storage
 
-🚧 Underdevelopment 
+![Logo](https://github.com/kamaravichow/youtube.ly-android/raw/main/docs/logo.png)
+
+Download the App from [RELEASES](https://github.com/kamaravichow/youtube.ly-android/releases)
